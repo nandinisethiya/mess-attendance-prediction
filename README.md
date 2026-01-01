@@ -1,11 +1,11 @@
 # mess-attendance-prediction
-A Google-powered system that predicts daily mess attendance to reduce food wastage and improve campus sustainability.# Smart Mess Predictor
+A Google-powered system that predicts daily mess attendance to reduce food wastage and improve campus sustainability.
 
 ## Problem
 In college messes, a large amount of food is wasted daily due to inaccurate estimation of student turnout.
 
 ## Solution
-This project predicts daily mess attendance using past data and day-based factors such as weekends, holidays, and menu type.  
+This project predicts daily mess attendance using past data and day-based factors such as weekends, holidays and meal prepared.  
 Based on the prediction, it recommends how much food should be prepared to reduce wastage.
 
 ## Google Tech. used
