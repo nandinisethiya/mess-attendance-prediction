@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Google GDG | Smart Mess Predictor (Final Optimized)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Product+Sans&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        :root { --google-blue: #4285F4; --google-red: #DB4437; --google-yellow: #F4B400; --google-green: #0F9D58; }
+        body { font-family: 'Roboto', sans-serif; background-color: #f8f9fa; margin: 0; color: #3c4043; }
+        .google-header { background: #fff; padding: 15px 25px; display: flex; align-items: center; border-bottom: 1px solid #dadce0; box-shadow: 0 1px 2px rgba(60,64,67,0.1); }
+        .google-header img { height: 24px; margin-right: 12px; }
+        .container { max-width: 750px; margin: 30px auto; background: white; padding: 30px; border-radius: 12px; border: 1px solid #dadce0; }
+        h2 { font-family: 'Product Sans', sans-serif; color: var(--google-blue); text-align: center; }
+        .card { border: 1px solid #dadce0; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 14px; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 4px; margin-bottom: 15px; box-sizing: border-box; }
+        .btn-predict { width: 100%; padding: 16px; background-color: var(--google-blue); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 16px; }
+        .ai-card { background: #f1f3f4; border-radius: 8px; padding: 15px; margin-top: 20px; border-left: 5px solid var(--google-blue); display: none; text-align: left; }
+        #resultsSection { display: none; margin-top: 30px; text-align: center; }
+        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; text-align: left; line-height: 1.4; }
+        .alert-danger { background: #fce8e6; color: #c5221f; border-left: 6px solid var(--google-red); }
+        .alert-success { background: #e6f4ea; color: #137333; border-left: 6px solid var(--google-green); }
+        .count-display { font-size: 52px; font-weight: 700; color: #202124; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="google-header">
+    <img src="https://www.gstatic.com/images/branding/googlelogo/svg/google_logo_clr_74x24px.svg" alt="Google">
+    <span>Developer Groups | Smart Mess Predictor</span>
+</div>
+
+<div class="container">
+    <h2>Student Turnout Prediction</h2>
+    <p style="text-align: center; color: #70757a; margin-top: -15px;">Total Mess Capacity: 550 Students</p>
+
+    <div class="card">
+        <label>Step 1: Sync Data (Upload mess_data3.csv)</label>
+        <input type="file" id="csvUpload" accept=".csv">
+    </div>
+
+    <div class="card">
+        <label>Factor 1: Day of Week</label>
+        <select id="daySelect">
+            <option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option>
+            <option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option><option value="7">Sunday</option>
+        </select>
+
+        <label>Factor 2: Festival Status</label>
+        <select id="festSelect">
+            <option value="no">No Festival</option>
+            <option value="yes">Yes (Festival Day)</option>
+        </select>
+
+        <label>Factor 3: Academic Status</label>
+        <select id="statusSelect">
+            <option value="regular">Regular Classes</option>
+            <option value="exam">Exams Period</option>
+            <option value="holiday">Holiday/Vacation</option>
+        </select>
+
+        <label>Factor 4: Select Menu Item</label>
+        <select id="menuSelect">
+            <option value="Paneer Butter Masala">Paneer Butter Masala</option>
+            <option value="Dal Tadka">Dal Tadka</option>
+            <option value="Mixed Veg">Mixed Veg</option>
+            <option value="Chicken Curry">Chicken Curry</option>
+            <option value="Biryani">Biryani</option>
+            <option value="Masala Dosa">Masala Dosa</option>
+            <option value="Kadi Pakoda">Kadi Pakoda</option>
+            <option value="Baingan Bharta">Baingan Bharta</option>
+            <option value="Pav Bhaji">Pav Bhaji</option>
+            <option value="Tinda Masala">Tinda Masala</option>
+            <option value="Karela Sabzi">Karela Sabzi</option>
+        </select>
+    </div>
+
+    <button class="btn-predict" onclick="runPrediction()">Calculate Final Prep Quantity</button>
+
+    <div id="resultsSection">
+        <div id="statusAlert" class="alert"></div>
+        <div class="count-display" id="finalCount">0</div>
+        <p>Predicted Attendees (out of 550 Total Students)</p>
+        
+        <div id="aiCard" class="ai-card">
+            <div style="font-weight:700; color: #4285F4; margin-bottom: 5px;">✨ Gemini AI Strategic Advice</div>
+            <div id="aiAdvice">Calculating insights...</div>
+        </div>
+
+        <canvas id="predictionChart" style="max-width: 300px; margin: 25px auto;"></canvas>
+    </div>
+</div>
+
+<script>
+    const API_KEY = "AIzaSyA2_2USSzFku1ZR1FIVh-I-tediC3nVOwM";
+    const TOTAL_CAPACITY = 550; 
+    let csvData = [];
+    let topWasteDishes = [];
+    let dishPerformance = {};
+    let myChart = null;
+
+    document.getElementById('csvUpload').addEventListener('change', (e) => {
+        Papa.parse(e.target.files[0], {
+            header: true, dynamicTyping: true, skipEmptyLines: true,
+            complete: (results) => { 
+                csvData = results.data;
+                analyzeData();
+                alert("Data Successfully Loaded.");
+            }
+        });
+    });
+
+    function analyzeData() {
+        let totals = {};
+        csvData.forEach(r => {
+            if (!totals[r.Menu_Item]) totals[r.Menu_Item] = { attend: 0, waste: 0, count: 0 };
+            totals[r.Menu_Item].attend += r.Actual_Attendance;
+            totals[r.Menu_Item].waste += r.Waste_Kg;
+            totals[r.Menu_Item].count++;
+        });
+
+        topWasteDishes = Object.keys(totals)
+            .map(name => ({ name, avgWaste: totals[name].waste / totals[name].count }))
+            .sort((a, b) => b.avgWaste - a.avgWaste).slice(0, 4).map(d => d.name);
+
+        const avgAttendanceOverall = csvData.reduce((s, r) => s + r.Actual_Attendance, 0) / csvData.length;
+        Object.keys(totals).forEach(name => {
+            const menuAvg = totals[name].attend / totals[name].count;
+            dishPerformance[name] = menuAvg / avgAttendanceOverall;
+        });
+    }
+
+    async function runPrediction() {
+        if (csvData.length === 0) return alert("Upload CSV first!");
+        
+        const day = parseInt(document.getElementById('daySelect').value);
+        const fest = document.getElementById('festSelect').value;
+        const status = document.getElementById('statusSelect').value;
+        const menu = document.getElementById('menuSelect').value;
+
+        let matches = csvData.filter(r => r.Day_of_Week === day);
+        let prediction = matches.reduce((s, r) => s + r.Actual_Attendance, 0) / (matches.length || 1);
+
+        if (fest === 'yes') prediction *= 0.65; 
+        if (status === 'exam') prediction *= 0.75; 
+        if (status === 'holiday') prediction *= 0.30; 
+
+        const menuWeight = dishPerformance[menu] || 1.0;
+        prediction *= menuWeight;
+
+        // NEW: Apply 97% Ceiling logic
+        let finalCount = Math.round(prediction * 1.05);
+        if (finalCount > (TOTAL_CAPACITY * 0.95)) {
+            finalCount = Math.round(TOTAL_CAPACITY * 0.97); // Trim by 3% if too close to 100%
+        }
+        
+        const absentCount = TOTAL_CAPACITY - finalCount;
+
+        document.getElementById('resultsSection').style.display = 'block';
+        document.getElementById('aiCard').style.display = 'block';
+        document.getElementById('finalCount').innerText = finalCount;
+
+        const alertDiv = document.getElementById('statusAlert');
+        if (topWasteDishes.includes(menu)) {
+            alertDiv.className = "alert alert-danger";
+            alertDiv.innerText = `⚠️ WASTE ALERT: Historical data shows "${menu}" often results in high leftovers. Recommend preparing for ${Math.round(finalCount * 0.9)} to ensure zero waste.`;
+        } else {
+            alertDiv.className = "alert alert-success";
+            alertDiv.innerText = `✅ OPTIMAL CHOICE: "${menu}" has a strong student turnout history.`;
+        }
+
+        updateChart(finalCount, absentCount);
+        getGeminiAdvice(finalCount, menu, status, fest, alertDiv.innerText);
+    }
+
+    async function getGeminiAdvice(count, dish, env, fest, warning) {
+        const adviceBox = document.getElementById('aiAdvice');
+        adviceBox.innerText = "Consulting Gemini AI...";
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+        
+        const requestBody = {
+            contents: [{
+                parts: [{
+                    text: `Hostel Warden Advisor: Predict ${count} out of 550 students for ${dish}. 
+                    Environment: ${env}, Festival: ${fest}. History: ${warning}. 
+                    Give 2 very practical, different sentences for the chef on portion control or ingredient saving.`
+                }]
+            }]
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+            const data = await response.json();
+            adviceBox.innerText = data.candidates[0].content.parts[0].text;
+        } catch (err) {
+            adviceBox.innerText = "AI Insight: Prepare base ingredients in batches to avoid cooking for the full capacity at once.";
+        }
+    }
+
+    function updateChart(present, absent) {
+        const ctx = document.getElementById('predictionChart').getContext('2d');
+        if (myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'pie',
+            data: { 
+                labels: ['Eating (Expected)', 'Absent (Out/Skip)'], 
+                datasets: [{ data: [present, absent], backgroundColor: ['#0F9D58', '#f1f3f4'], borderColor: '#dadce0', borderWidth: 1 }] 
+            },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+</script>
+</body>
+</html>
