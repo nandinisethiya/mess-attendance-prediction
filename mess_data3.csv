@@ -1,0 +1,31 @@
+Date,Day_of_Week,Is_Weekend,Is_Exam,Menu_Item,Menu_Popularity,Actual_Attendance,Waste_Kg
+2025-09-01,1,0,0,Paneer Butter Masala,5,485,4.2
+2025-09-02,2,0,0,Dal Tadka,3,440,8.5
+2025-09-03,3,0,0,Mixed Veg,2,410,15.2
+2025-09-04,4,0,0,Chana Masala,3,430,9.0
+2025-09-05,5,0,0,Chicken Curry,5,490,3.8
+2025-09-06,6,1,0,Aloo Gobhi,2,220,12.4
+2025-09-07,7,1,0,Veg Pulao,3,190,14.1
+2025-09-08,1,0,0,Masala Dosa,4,460,6.2
+2025-09-09,2,0,0,Kadi Pakoda,2,380,18.5
+2025-09-10,3,0,0,Baingan Bharta,2,370,19.2
+2025-09-11,4,0,1,Pav Bhaji,5,510,2.5
+2025-09-12,5,0,1,Biryani,5,525,1.2
+2025-09-13,6,1,1,Tinda Masala,1,350,22.4
+2025-09-14,7,1,1,Karela Sabzi,1,340,25.1
+2025-09-15,1,0,1,Paneer Butter Masala,5,530,2.0
+2025-09-16,2,0,1,Dal Tadka,3,505,3.4
+2025-09-17,3,0,0,Mixed Veg,2,390,18.2
+2025-09-18,4,0,0,Chana Masala,3,420,10.1
+2025-09-19,5,0,0,Chicken Curry,5,480,4.5
+2025-09-20,6,1,0,Aloo Gobhi,2,210,11.8
+2025-09-21,7,1,0,Veg Pulao,3,200,13.5
+2025-09-22,1,0,0,Paneer Butter Masala,5,470,5.5
+2025-09-23,2,0,0,Dal Tadka,3,430,8.2
+2025-09-24,3,0,0,Mixed Veg,2,385,19.0
+2025-09-25,4,0,0,Chana Masala,3,425,9.5
+2025-09-26,5,0,0,Chicken Curry,5,488,4.0
+2025-09-27,6,1,0,Aloo Gobhi,2,230,10.5
+2025-09-28,7,1,0,Veg Pulao,3,205,12.8
+2025-09-29,1,0,0,Paneer Butter Masala,5,478,4.8
+2025-09-30,2,0,0,Dal Tadka,3,432,8.0
